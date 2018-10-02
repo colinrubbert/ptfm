@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Title, Description, and Author -->
+    <title>pwa-example-code</title>
+    <meta name="description" content="A general description for the site to appear in search engine results">
+    <meta name="author" content="Your Name">
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/img/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./assets/img/icons/favicon-16x16.png">
+    <!--[if IE]><link rel="shortcut icon" href="./assets/img/icons/favicon.ico"><![endif]-->
+    <!-- Add to home screen for Android and modern mobile browsers -->
+    <link rel="manifest" href="./assets/manifest.json">
+    <meta name="theme-color" content="#4DBA87">
+    <!-- Add to home screen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="pwa-example-code">
+    <link rel="apple-touch-icon" href="./assets/img/icons/apple-touch-icon-152x152.png">
+    <!-- Add to home screen for Windows -->
+    <meta name="msapplication-TileImage" content="./assets/img/icons/msapplication-icon-144x144.png">
+    <meta name="msapplication-TileColor" content="#000000">
+    <link rel="stylesheet" href="./assets/styles.css">
+    <!-- Open Graph Meta -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:title" content="title goes here">
+    <meta property="og:image" content="link_to_image">
+    <meta property="og:description" content="description goes here">
+    <meta property="og:sitename" content="Sitename">
+    <!-- Twitter Card Meta -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="title goes here">
+    <meta name="twitter:description" content="description goes here">
+    <meta name="twitter:url" content="site url goes here">
+    <meta name="twitter:image" content="site image goes here">
+
+  </head>
+  <body>
+    <nav>
+      <div class="navigation-wrapper">
+        <div class="branding-wrapper">
+          <h1 id="app">{{ message }}</h1>
+        </div>
+      </div>
+    </nav>
+
+    <section>
+      <div id="identify">
+        <h1>{{ chapter }}</h1>
+        <br>
+        <h1 class="category">{{ category }}</h1>
+        <div class="application" v-for="app in application">
+          <h2>{{ app.applicationName }}</h2>
+          <hr>
+          <div class="command" v-for="command in app.commandItem">
+            <h3>{{ command.description }}</h3>
+            <small>Command:</small>
+            <pre>{{ command.command }}</pre>
+            <div v-if="command.example" >
+              <small>Example:</small>
+              <pre>{{ command.example }}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- VueJS Code -->
+    <script src="./assets/scripts.js"></script>
+  </body>
+</html>

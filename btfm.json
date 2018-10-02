@@ -1,0 +1,2939 @@
+## '1. Identify (Scope)'
+
+### Scanning and Vulnerabilities
+
+
+#### Nmap
+
+
+'Ping sweep for network:'
+'$nmap -sn -PE <IP ADDRESS OR RANGE>'
+
+'Scan and show open ports:'
+'$nmap --open <IP ADDRESS OR RANGE>'
+
+'Determine open services:'
+'$nmap -sV <IP ADDRESS>'
+
+'Scan two common TCP ports, HTTP and HTTPS:'
+'$nmap -p 80,443 <IP ADDRESS OR RANGE>'
+
+'Scan common UDP ports, DNS:'
+'$nmap -sU -p 53 <IP ADDRESS OR RANGE>'
+
+'Scan UDP and TCP together, be verbose on a single host and include optional skip ping:'
+'$nmap -v -Pn -sU -sT -p U:53,11,137,T:21-25,80,189,8080 <IP ADDRESS>'
+
+
+#### Nessus
+
+'Basic Nessus Scan:'
+'$nessus -q -x -T html <NESSUS SERVER IP ADDRESS> <NESSUS SERVER PORT 1241> <ADMIN ACCOUNT> <ADMIN PASSWORD> <FILE WITH TARGETS>.txt <RESULTS FILE NAME>.html
+$ nessus [-vnh] [-c .rcfile] [-V] [-T <format>]'
+
+'Batch-mode scan:'
+'$nessus -q [-pPS] <HOST> <PORT> <USER NAME> <PASSWORD> <targets-file> <result-file>'
+
+'Report conversion:'
+'$nessus -i in.[nsr|nbe] -o out.[xml|nsr|nbe|html|txt]'
+
+#### OpenVAS
+
+
+'Step 1: Install the server, client and plugin packages.'
+'$apt-get install openvas-server openvas-client openvas-plugins-base openvas-plugins-dfsg'
+
+'Step 2: Update the vulnerability database:'
+'$openvas-nvt-sync'
+
+'Step 3:' add a user to run the client:
+
+'$openvas-adduser
+'
+
+'Step 4': Login: sysadm
+
+'Step 5:' Authentication (pass/cert) [pass]: [HIT ENTER]
+
+'Step 6:' Login password: <PASSWORD>
+
+You will then be asked to add "User Rules".
+
+'Step 7': Allow this user to scan authorized network by typing:
+
+'
+accept <YOUR IP ADDRESS OR RANGE>
+default deny
+'
+
+'Step 8:' type Ctrl-D to exit, and then accept.
+
+'Step 9:' Start the server
+
+'$service openvas-server start
+'
+
+'Step 10:' Set targets to scan:
+
+Create a text file with a list of hosts/networks to scan.
+
+'
+vi scanme.txt
+'
+
+'Step 11:'  Add one host, network per line:
+
+'
+<IP ADDRESS PER RANGE>
+'
+
+'Step 12:' Run scan:
+
+'$openvas-client -q 127.0.0.1 9390 sysadm nsrc+ws scanme.txt openvas-output.txt -T txt -V -x
+'
+
+'Step 13:' (Optional) Run scan with HTML format:
+
+'$openvas-client -q 127.0.0.1 9390 sysadm nsrc+ws scanme.txt openvas-output.txt -T txt -V -x
+'
+
+-------
+
+### Windows
+
+#### Network Discovery
+
+'Basic Network Discovery:'
+
+'
+C:\> net view /all
+
+C:\> net view \\<HOST NAME>
+'
+
+'Basic ping scan and write output to a file:'
+
+'
+C:\> for /L %I in (1,1,254) do ping -w 30 -n 1 192.168.1.%I | find "Reply" >> <OUTPUT FILE NAME>.txt
+'
+
+------------
+
+#### DHCP
+
+'Enable DHCP server logging:'
+
+'
+C:\> reg add HKLM\System\CurrentControlSet\Services\DhcpServer\Parameters /v ActivityLogFlag /t REG_DWORD /d 1
+'
+
+'Default Location Windows Server 2003/2008/2016:'
+
+'
+C:\> %windir%\System32\Dhcp
+'
+
+--------------
+
+
+#### DNS
+
+'Default location Windows 2003:'
+
+
+'
+C:\> %SystemRoot%\System32\Dns
+'
+
+'Default location Windows 2008:'
+
+
+'
+C:\> %SystemRoot%\System32\Winevt\Logs\DNSServer.evtx
+'
+
+'Default location of enhanced Windows 2012 R2:'
+
+'
+C:\> %SystemRoot%\System32\Winevt\Logs\Microsoft-Windows-DNSServer%4Analytical.etl
+'
+
+Reference [https://technet.microsoft.com/en-us/library/cc940779.aspx](https://technet.microsoft.com/en-us/library/cc940779.aspx)
+
+'Enable DNS Logging:'
+
+'
+C:\> DNSCmd <DNS SERVER NAME> /config /logLevel 0x8100F331
+'
+
+'Set log location:'
+
+'
+C:\> DNSCmd <DNS SERVER NAME> /config /LogFilePath <PATH TO LOG FILE>
+'
+
+'Set size of log file:'
+
+'
+C:\> DNSCmd <DNS SERVER NAME> /config /logfilemaxsize 0xffffffff
+'
+
+----------------
+
+#### Hashing
+
+'File Checksum Integrity Verifier (FCIV):'
+
+Reference [http://support2.microsoft.com/kb/841290](http://support2.microsoft.com/kb/841290)
+
+'Hash a file:' 
+
+'
+C:\> fciv.exe <FILE TO HASH>
+'
+
+'Hash all files on C:\ into a database file'
+
+'
+C:\> fciv.exe C:\ -r -md5 -xml <FILE NAME>.xml
+'
+
+'List all hashed files'
+
+'
+C:\> fciv.exe -list -sha1 -xml <FILE NAME>.xml
+'
+
+'Verify previous hashes in db with file system':
+
+'
+C:\> fciv.exe -v -sha1 -xml <FILE NAME>.xml
+'
+
+'Note: May be possible to create a master db and compare to all systems from a cmd line. Fast baseline and difference.'
+
+Reference: [https://technet.microsoft.com/en-us/library/dn520872.aspx](https://technet.microsoft.com/en-us/library/dn520872.aspx)
+
+'
+PS C:\> Get-FileHash <FILE TO HASH> | Format-List
+
+PS C:\> Get-FileHash -Algorithm MD5 <FILE TO HASH>
+
+C:\> certutil -hashfile <FILE TO HASH> SHA1
+
+C:\> certutil -hashfile <FILE TO HASH> MD5
+'
+
+----------
+
+#### NetBIOS
+
+'Basic nbtstat scan:'
+
+'
+C:\> nbtstat -A <IP ADDRESS>
+'
+
+'Cached NetBIOS info on localhost:'
+
+'
+C:\> nbtstat -c
+'
+
+'Script loop scan:'
+
+'
+C:\> for /L %I in (1,1,254) do nbtstat -An 192.168.1.%I
+'
+
+----------------
+
+#### User Activity
+
+
+Reference: [https://technet.microsoft.com/en-us/sysinternals/psloggedon.aspx](https://technet.microsoft.com/en-us/sysinternals/psloggedon.aspx)
+
+'Get users logged on:'
+
+'
+C:\> psloggedon \\COMPUTERNAME
+'
+
+
+'Script loop scan:'
+
+'
+C:\> for /L %i in (1,1,254) do psloggedon \\192.168.1.%i >> C:\users_output.txt
+'
+
+---------------------
+
+
+#### Passwords
+
+'Password guessing or checks:'
+
+'
+C:\> for /f %i in (<PASSWORD FILE NAME>.txt) do @echo %i & net use \\<TARGET IP ADDRESS> %i /u:<USERNAME> 2>nul && pause
+
+C:\> for /f %i in (<USERNAME FILE NAME>.txt) do @(for /f %j in (<PASSWORD FILE NAME>.txt) do @echo %i:%j & @net use \\<TARGET IP ADDRESS> %j /u:%i 2>nul && echo %i:%j >> success.txt && net use \\\<IP ADDRESS> /del)
+'
+
+------------------
+
+
+#### Microsoft Baseline Security Analyzer (MBSA)
+
+'Basic scan of a target IP address:'
+
+'
+C:\> mbsacli.exe /target <TARGET IP ADDRESS> /n os+iis+sql+password
+'
+
+'Basic scan of a target IP range:'
+
+'
+C:\> mbsacli.exe /r <TARGET ADDRESS RANGE> /n os+iis+sql+password
+'
+
+'Basic scan of a target domain:'
+
+'
+C:\> mbsacli.exe /d <TARGET DOMAIN> /n os+iis+sql+password
+'
+
+'Basic scan of target computer names in a text file:'
+
+'
+C:\> mbsacli.exe /listfile <LISTNAME OF COMPUTER NAMES>.txt /n os+iis+sql+password
+'
+
+------------------------
+
+#### Active Directory Inventory
+
+'List all OUs:'
+
+'
+C:\> dsquery ou DC=<DOMAIN>,DC=<DOMAIN EXTENSION>
+'
+
+'List of workstations in the domain:'
+
+'
+C:\> netdom query WORKSTATION
+'
+
+'List of servers in the domain:'
+
+'
+C:\> netdom query SERVER
+'
+
+'List of domain controllers:'
+
+'
+C:\> netdom query DC
+'
+
+
+'List of organizational units under which the specified user can create a machine object:'
+
+'
+C:\> netdom query OU
+'
+
+
+'List of primary domain controller:'
+
+'
+C:\> netdom query PDC
+'
+
+
+'List the domain trusts:'
+
+'
+C:\> netdom query TRUST
+'
+
+'Query the domain for the current list of FSMO owners:'
+
+'
+C:\> netdom query FSMO
+'
+
+'List all computers from Active Directory:'
+
+'
+C:\> dsquery COMPUTER "OU=servers,DC=<DOMAIN NAME>,DC=<DOMAIN EXTENSION>" -o rdn -limit 0 > C:\machines.txt
+'
+
+'List user accounts inactive longer than 3 weeks'
+
+'
+C:\> dsquery user domainroot -inactive 3
+'
+
+'Find anything (or user) created on date in UTC using timestamp format YYYMMDDHHMMSS.sZ:'
+
+'
+C:\> dsquery * -filter "(whenCreated>=YYYMMDDHHMMSS.0Z)"
+
+C:\> dsquery * -filter "((whenCreated>=YYYMMDDHHMMSS.0Z)&(objectClass=user))"
+'
+
+--------------
+
+
+### Linux
+
+#### Network Discovery
+
+'Net view scan:'
+
+'$smbtree -b
+
+# smbtree -D
+
+# smbtree -s
+'
+
+'View open SMB shares:'
+
+'$smbclient -L <HOST NAME>
+
+# smbstatus
+'
+
+'Basic Ping Scan:'
+
+'$for ip in $(seq 1 254); do ping -c 1 192.168.1.$ip>/dev/null; [ $? -eq 0 ] && echo "192.168.1.$ip UP" || : ; done
+'
+
+-------------------
+
+#### DHCP
+
+'View DHCP lease logs':
+
+'Red Hat 3:'
+
+'
+cat /var/lib/dhcpd/dhcdp.leases
+'
+
+'Ubuntu:'
+
+'$grep -Ei 'dhcp' /var/log/syslog.1
+'
+
+'Ubuntu DHCP logs:'
+
+'$tail -f dhcp.log
+'
+
+--------------
+
+#### DNS 
+
+'Start DNS logging:'
+
+'$rndc querlog
+'
+
+'View DNS logs:'
+
+'
+tail -f /var/log/messages | grep named
+'
+
+
+------------------
+
+
+#### Hashing
+
+'$find /<PATHNMAME TO ENUMERATE> -type f -exec md5sum {} >> md5sums.txt \;
+
+# md5deep -rs / > md5sums.txt
+'
+
+
+------------------
+
+
+#### NetBIOS
+
+'Basic nbtstat scan:'
+
+'$nbtscan <IP ADDRESS OR RANGE>
+'
+
+--------------
+
+#### Passwords
+
+'Password and username guessing or checks:'
+
+'$while read line; do username=$line; while read line; do smbclient -L <TARGET IP ADDRESS> -U $username%$line -g -d 0; echo "$username:$line"; done < <PASSWORDS>.txt; done < <USERNAME>.txt
+'
+
+-----------------
+
+## '3. Protect (Defend)'
+
+### Windows
+
+#### Disable/Stop Services
+
+'Get a list of services and disable or stop them:'
+
+'
+C:\> sc query
+
+C:\> sc config "<SERVICE NAME>" start=disabled
+
+C:\> sc stop "<SERVICE NAME>" 
+
+C:\> wmic service where name='<SERVICE NAME>' call ChangeStartmode disabled
+'
+
+#### Host System Firewalls
+
+'Show all rules:'
+
+'
+C:\> netsh advfirewall firewall show rule name=all
+'
+
+'Set firewall on/off:'
+
+'
+C:\> netsh advfirewall set currentprofile state on
+
+C:\> netsh advfirewall set currentprofile firewallpolicy blockinboundalways,allowoutbound
+
+C:\> netsh advfirewall set currentprofile set publicprofile state on
+
+C:\> netsh advfirewall set currentprofile set privateprofile state on
+
+C:\> netsh advfirewall set currentprofile set domainprofile state on
+
+C:\> netsh advfirewall set currentprofile set allprofile state on
+
+C:\> netsh advfirewall set currentprofile set allprofile state off
+'
+
+'Set firewall rules examples:'
+
+'
+C:\> netsh advfirewall firewall add rule name="Open Port 80" dir=in action=allow protocol=TCP localport=80
+
+C:\> netsh advfirewall firewall add rule name="My Application" dir=in action=allow program="C:\MyApp\MyApp.exe" enable=yes
+
+C:\> netsh advfirewall firewall add rule name="My Application" dir=in action=allow program="C:\MyApp\MyApp.exe" enable=yes remoteip=157.60.0.1,172.16.0.0/16,LocalSubnet profile=domain
+
+C:\> netsh advfirewall firewall add rule name="My Application" dir=in action=allow program="C:\MyApp\MyApp.exe" enable=yes remoteip=157.60.0.1,172.16.0.0/16,LocalSubnet profile=public
+
+C:\> netsh advfirewall firewall add rule name="My Application" dir=in action=allow program="C:\MyApp\MyApp.exe" enable=yes remoteip=157.60.0.1,172.16.0.0/16,LocalSubnet profile=private
+
+C:\> netsh advfirewall firewall delete rule name=rule name program="C:\MyApp\MyApp.exe"
+
+C:\> netsh advfirewall firewall delete rule name=rule name protocol=udp localport=500
+
+C:\> netsh advfirewall firewall set rule group="remote desktop" new enable=Yes profile=domain
+
+C:\> netsh advfirewall firewall set rule group="remote desktop" new enable=No profile=public
+'
+
+
+'Setup logging location:'
+
+'
+C:\> netsh advfirewall set currentprofile logging C:\<LOCATION>\<FILENAME>
+'
+
+'Windows firewall log location and settings:'
+
+'
+C:\> more %systemroot%\system32\LogFiles\Firewall\pfirewall.log
+
+C:\> netsh advfirewall set allprofile logging maxfilesize 4096
+
+C:\> netsh advfirewall set allprofile logging droppedconnections enable
+
+C:\> netsh advfirewall set allprofile logging allowedconnections enable
+'
+
+'Display firewall logs:'
+
+'
+PS C:\> Get-Content $env:systemroot\system32\LogFiles\Firewall\pfirewall.log
+'
+
+--------------
+
+#### Passwords
+
+'Change password:'
+
+'
+C:\> net user <USERNAME> * /domain
+
+C:\> net user <USERNAME> <NEW PASSWORD>
+'
+
+
+'Change password remotely'
+
+Reference: [https://technet.microsoft.com/en-us/sysinternals/bb897543](https://technet.microsoft.com/en-us/sysinternals/bb897543)
+
+'
+C:\> pspasswd.exe \\<IP ADDRESS or NAME OF REMOTE COMPUTER> -u <REMOTE USER NAME> -p <NEW PASSWORD>
+'
+
+------------
+
+#### Host File
+
+'Flush DNS of malicious domain/IP:'
+
+'
+ipconfig /flushdns
+'
+
+'Flush NetBIOS cache of host/IP:'
+
+'
+nbtstat -R
+'
+
+'Add new malicious domnain to hosts file, and route it to localhost:'
+
+'
+C:\> echo 127.0.0.1 <MALICIOUS DOMAIN> >> C:\Windows\System32\drivers\etc\hosts
+'
+
+
+'Check if hosts file is working, by making sure ping gets sent to 127.0.0.1:'
+
+'
+C:\> ping <MALICIOUS DOMAIN> -n 1
+'
+
+------------------
+
+#### Whitelist
+
+'Use a Proxy Auto Config (PAC) file to create Bad URL or IP list (IE, Firefox, Chrome):'
+
+'
+function FindProxyForURL( url, host ){
+    
+    // Send bad DNS name to the proxy
+
+    if ( dnsDomainIs( host, ".badsite.com" ) )
+        return "PROXY http://127.0.0.1:8080";
+
+    // Send bad IPs to the proxy
+
+    if ( isInNet( myIpAddress(), "222.222.222.222", "255.255.255.0" ) )
+        return "PROXY http://127.0.0.1:8080";
+
+    // All other traffic bypass proxy
+
+    return "DIRECT"
+
+}
+'
+
+-----------
+
+
+#### Application Restrictions
+
+'AppLocker -- Server 2008 R2 or Windows 7 or higher:'
+
+'Using GUI Wizard configure:'
+
+* Executable Rules (.exe, .com)
+* DLL Rules (.dll, .ocx)
+* Script Rules (.ps1, .bat, .cmd, .vbs, .js)
+* Windows Install Rules
+
+'Steps to employ AppLocker (GUI is needed for digital signed app restrictions)'
+
+'Step 1:' Create a new GPO.
+
+'Step 2:' Right-click on it to edit, and then navigate through Computer Configuration, Policies, Windows Settings, Security Settings, Application Control Policies and AppLocker. Click Configure Role Enforcement.
+
+'Step 3:' Under Executable Rules, check the Configured box and then make sure Enforce Rules is select from the dro-down box. Click OK.
+
+'Step 4:' In the left pane, click Executable Rules.
+
+'Step 5:' Right-click in the right pane and select Create New Rule.
+
+'Step 6:' On the Before You Begin Screen, click Next.
+
+'Step 7:' On the Permissions screen, click Next.
+
+'Step 8:' On the Conditions screen, select the Publisher condition and click Next.
+
+'Step 9:' Click the Browse button and browse to any executable file on your system. It doesn't matter which.
+
+'Step 10:' Drag the slider up to Any Publisher and then click Next.
+
+'Step 11:' Click Next on the Exceptions screen.
+
+'Step 12:' Name policy, Example "Only run executables that are signed" and click Create.
+
+'Step 13:' If this is your first time creating an AppLocker rule, Windows will prompt you to create default rule, click Tes.
+
+'Step 14:' Ensure Application Identity Service is running.
+
+'
+C:\> net start AppIDSvc
+
+C:\> reg add "HKLM\SYSTEM\CurrentControlSet\services\AppIDSvc" /v Start /t REG_DWORD /d 2 /f
+'
+
+
+'Step 15:' Changes require reboot.
+
+'
+C:\> shutdown.exe /r
+
+C:\> shutdown.exe /r /m \\<IP ADDRESS OR COMPUTER NAME> /f
+'
+
+'Add the AppLocker cmdlets into PowerShell:'
+
+'
+PS C:\> Import-Module AppLocker
+'
+
+
+'Gets the file information for all of the executable files and scripts in the directory C:\Windows\System32:'
+
+'
+PS C:\> Get-AppLockerFileInformation -Directory C:\Windows\System32\ -Recurse -FileTyle Exe, Script
+'
+
+'Create an AppLocker policy that allow rules for all of the executable files in C:\Windows\System32:'
+
+'
+PS C:\> Get-ChildItem C:\Windows\System32\*.exe | Get-AppLockerFileInformtion | New-AppLockerPolicy -RuleType Publisher, Hash -User Everyone -RuleNamePrefix System32
+'
+
+'Sets the local AppLocker policy to the policy specific in C:\Policy.xml:'
+
+'
+PS C:\> Set-AppLockerPolicy -XMLPolicy C:\Policy.xml
+'
+
+'Uses the AppLocker Policy in C:\Policy.xml to test whether calc.exe and notepad.exe are allowed to run for users who are members of the Everyone Group. If you do not specify a group, the Everyone Group is used by default:'
+
+'
+PS C:\> Test-AppLockerPolicy -XMLPolicy C:\Policy.xml -Path C:\Windows\System32\calc.exe,C:\Windows\System32\notepad.exe -User Everyone
+'
+
+'Review how many times a file would have been blocked from running if rules were enforced:'
+
+'
+PS C:\> Get-AppLockerFileInformation -EventLog -Logname "Microsoft-Windows-AppLocker\EXE and DLL" -EventType Audited -Statistics
+'
+
+'Creates a new AppLocker policy from the audited events in the local Microsoft-Windows-AppLocker\EXE and DLL event log, applied to <GROUP> and current AppLocker polcy will be overwritten:'
+
+'
+PS C:\> Get-AppLockerFileInformation -EventLog -LogPath "Microsoft-Windows-AppLocker/EXE and DLL" -EventType Audited | New-AppLockerPolicy -RuleType Publisher,Hash -User domain\<GROUP> -IgnoreMissingFileInformation | Set-AppLockerPolicy -LDAP "LDAP://<DC>.<DOMAIN>.com/CN={31B2F340-016D-11D2-945F-00C04FB984F9},CN=Policies,CN=System,DC=<DOMAIN>,DC=com"
+'
+
+'Export the local AppLocker polcy, comparing User's explicitly denied access to run, and output test file:'
+
+'
+PS C:\> Get-AppLockerPolict -Local | Test-AppLockerPolicy -Path C:\Windows\System32\*.exe -User domain\<USER NAME> -Filter Denied | Format-List -Property Path > C:\DeniedFiles.txt
+'
+
+'Export the results of the test to a file analysis:'
+
+'
+PS C:\> Get-ChildItem <DirectoryPathToReview> -Filter <FileExtensionFilter> -Recurse | Convert-Path | Test-AppLockerPolicy -XMLPolicy <PathToExportedPolicyFile> -User <domain\username> -Filter <TypeOfRuleToFilterFor> | Export-CSV <PathToExportResultsTo>.csv
+'
+
+
+'GridView list of any local rules applicable':
+
+'
+PS C:\> Get-AppLockerPolicy -Local -XML | Out-GridView
+'
+
+
+-----------------------
+
+
+#### IPsec
+
+'Create an IPsec Local Security Policy, applied to any connection, any protocol, and using a preshard key:'
+
+'
+C:\> netsh ipsec static add filter filterlist=MyIPsecFilter srcaddr=Any dstaddr=Any protocol=ANY
+
+C:\> netsh ipsec static add filteraction name=MyIPsecAction action=negotiate
+
+C:\> netsh ipsec static add policy name=MyIPsecPolicy assign=yes
+
+C:\> netsh ipsec static add rule name=MyIPsecRule policy=MyIPsecPolicy filterlist=MyIPsecFilter filteraction=MyIPsecAction conntype=all activate=yes psk=<PASSWORD>
+'
+
+'Add rule to allow web browsing port 80 (HTTP) and 443 (HTTPS) over IPsec:'
+
+'
+C:\> netsh ipsec static add filteraction name=Allow action=permit
+
+C:\> netsh ipsec static add filter filterlist=WebFilter srcaddr=Any dstaddr=Any protocol=TCP dstport=80
+
+C:\> netsh ipsec static add filter filterlist=WebFilter srcaddr=Any dstaddr=Any protocol=TCP dstport=443
+
+C:\> netsh ipsec static add rule name=WebAllow policy=MyIPsecPolicy filterlist=WebFilter filteraction=Allow conntype=All activate=yes psk=<PASSWORD>
+'
+
+'Shows the IPsec Local Security Policy with name "MyIPsecPolicy":'
+
+'
+C:\> netsh ipsec static show policy name=MyIPsecPolicy
+'
+
+'Stop or Unassign an IPsec Policy:'
+
+'
+C:\> netsh ipsec static set policy name=MyIPsecPolicy
+'
+
+'Create an IPsec Advanced Firewall Rule and Policy and preshared key from and to any connections:'
+
+'
+C:\> netsh advfirewall consec add rule name="IPSEC" endpoint1=any endpoint2=any action=requireinrequireout qmsecmethods=default
+'
+
+'Require IPsec preshared key on all outgoing requests:'
+
+'
+C:\> netsh advfirewall firewall add rule name="IPSEC_Out" dir=out action=allow enable=yes profile=any localip=any remoteip=any protocol=any interfacetype=any security=authenticate
+'
+
+'Create a rule for web browsing:'
+
+'
+C:\> netsh advfirewall firewall add rule name="Allow Outbound Port 80" dir=out localport=80 protocol=TCP action=allow
+'
+
+'Create a rule for DNS:'
+
+'
+C:\> netsh advfirewall firewall add rule name="Allow Outbound Port 53" dir=out localport=53 protocol=UDP action=allow
+'
+
+'Delete IPsec Rule:'
+
+'
+C:\> netsh advfirewall firewall delet rule name="IPSEC_RULE"
+'
+
+-----------------
+
+
+#### Active Directory / Group Policy Object
+
+'Get and force new policies:'
+
+'
+C:\> gpupdate /force
+
+C:\> gpupdate /sync
+'
+
+'Audit success and failure for user Bob:'
+
+'
+C:\> auditpol /set /user:bob /category:"Detailed Tracking" /include /success:enable /failure:enable
+'
+
+'Create an Organizational Unit to move suspected or infected users and machines:'
+
+'
+C:\> dsadd ou <QUARANTINE BAD OU>
+'
+
+'Move an active directory user object into NEW GROUP:'
+
+'
+PS C:\> Move-ADObject 'CN=<USER NAME>,CN='OLD USER GROUP>,DC=<OLD DOMAIN>,DC=<OLD EXTENSION>' -TargetPath 'OU=<UNEW USER GROUP>,DC=<OLD DOMAIN>,DC=<OLD EXTENSION>'
+'
+
+
+------------------
+
+#### Stand-Alone System/Miscellaneous
+
+'Disallow running an .exe file:'
+
+'
+C:\> reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\" /v DisallowRun /t REG_DWORD /d "00000001" /f
+
+C:\> reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\DisallowRun" /v badfile.exe /t REG_SZ /d <BAD FILE NAME>.exe /f
+'
+
+
+'Disable Remote Desktop:'
+
+'
+C:\> reg add "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnectionns /t REG_DWORD /d 1 /f
+'
+
+'Send NTLMv2 response only/refurse LM and NTLM (Windows 7 default):'
+
+'
+C:\> reg add "HKLM\System\CurrentControlSet\Control\Lsa" /v lmcompatibilitylevel /t REG_DWORD /d 5 /f
+'
+
+'Restrict Anonymous Access:'
+
+'
+C:\> reg add "HKLM\System\CurrentControlSet\Control\Lsa" /v restrictanonymous /t REG_DWORD /d 1 /f
+'
+
+'Do not allow anonymous enumeration of SAM accounts and shares:'
+
+'
+C:\> reg add "HKLM\System\CurrentControlSet\Control\Lsa" /v restrictanonymoussam /t REG_DWORD /d 1 /f
+'
+
+'Disable IPv6:'
+
+'
+C:\> reg add "HKLM\System\CurrentControlSet\services\TCPIP6\Parameters" /v DisabledComponents /t REG_DWORD /d 255 /f
+'
+
+'Disable Sticky Keys:'
+
+'
+C:\> reg add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f
+'
+
+'Disable Toggle Keys:'
+
+'
+C:\> reg add "HKCU\Control Panel\Accessibility\ToggleKeys" /v Flags /t REG_SZ /d 58 /f
+'
+
+'Disable Filter Keys:'
+
+'
+C:\> reg add "HKCU\Control Panel\Accessibility\Keyboard Response" /v Flags /t REG_SZ /d 122 /f
+'
+
+'Disable On-Screen Keyboard:'
+
+'
+C:\> reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI" /v ShowTabletKeyboard /t REG_DWORD /d 0 /f
+'
+
+
+'Disable Administrative Shares - Workstations:'
+
+'
+C:\> reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /v AutoShareWks /t REG_DWORD /d 0 /f
+'
+
+
+'Disable Administrative Shares - Servers:'
+
+'
+C:\> reg add "HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters" /v AutoShareServer /t REG_DWORD /d 0 /f
+'
+
+'Remove Creation of Hashes Used to Pass the Hash Attack (requires password reset and reboot to purge old hashes):'
+
+'
+C:\> reg add "HKLM\SYSTEM\CurrentControlSet\Control\Lsa" /v NoLMHash /t REG_DWORD /d 1 /f
+'
+
+
+'Disable IE Password Cache:'
+
+'
+C:\> reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /v DisablePasswordCaching /t REG_DWORD /d 1 /f
+'
+
+
+'Disable CMD Prompt:'
+
+'
+C:\> reg add "HKCU\Sofware\Policies\Microsoft\Windows\System" /v DisableCMD /t REG_DWORD /d 1 /f
+'
+
+
+'Disable Admin credentials cache on host when using RDP:'
+
+'
+C:\> reg add "HKLM\System\CurrentControlSet\Control\Lsa" /v DisableRestrictedAdmin /t REG_DWORD /d 0 /f
+'
+
+'Do not process the RunOnce list:'
+
+'
+C:\> reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v DisableLocalMachineRunOnce /t REG_DWORD /d 1 /f
+'
+
+'Require User Access Control (UAC) Permission:'
+
+'
+C:\> reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 1 /f
+'
+
+'Change Password at next logon:'
+
+'
+PS C:\> Set-ADAccountPassword <USER> -NewPassword $newpwd -Reset -PassThru | Set-ADUser -ChangePasswordAtLogon $True
+'
+
+'Change Password at next logon for OU group:'
+
+'
+PS C:\> Get-ADUser -filter "department -eq '<OU GROUP>' -AND enabled -eq 'True'" | Set-ADUser -ChangePasswordAtLogon $True
+'
+
+'Enable Firewall Logging:'
+
+'
+C:\> netsh firewall set logging droppedpackets connections=enable
+'
+
+-----
+
+### Linux
+
+#### Disable/Stop Services
+
+
+'Services Information:'
+
+'$service --status-all
+
+# ps -ef
+
+# ps -aux
+'
+
+'Get a list of upstart jobs:'
+
+'$initctl list
+'
+
+'Example of start, stop, restarting a service in Ubuntu:'
+
+'$/etc/init.d/apache2 start
+
+# /etc/init.d/apache2 restart
+
+# /etc/init.d/apache2 stop (stops only until reboot)
+
+# service mysql start
+
+# service mysql restart
+
+# service mysql stop  (stops only until reboot)
+'
+
+'List all Upstart services:'
+
+'$ ls /etc/init/*.conf
+'
+
+'Show if a program is managed by upstart and the process ID:'
+
+'$status ssh
+'
+
+
+'If not managed by upstart:'
+
+'$update-rc.d apache2 disable
+
+# service apache2 stop
+'
+
+
+-----------------
+
+
+#### Host System Firewalls
+
+
+'Export existing iptables firewall rules'
+
+'$iptables-save > firewall.out
+'
+
+'Edit firewall rules and chains in firewall.out and save the file:'
+
+'$vi firewall.out
+'
+
+'Apply back to iptables:'
+
+'$iptables-restore < firewall.out
+'
+
+'Example iptables commands (IP, IP range, port blocks):'
+
+'$iptables -A INPUT -s 10.10.10.10 -j DROP
+
+# iptables -A INPUT -s 10.10.10.0/24 -j DROP
+
+# iptables -A INPUT -p tcp --dport ssh -s 10.10.10.10 -j DROP
+
+# iptables -A INPUT -p tcp --dport ssh -j DROP
+'
+
+'Block all connections:'
+
+'$iptables-policy INPUT DROP
+
+# iptables-policy OUTPUT DROP
+
+# iptables-policy FORWARD DROP
+'
+
+'Log all denied iptables rules:'
+
+'$iptables -I INPUT 5 -m limit --limit 4/min -j LOG --log-prefix "iptables denied: " --log-level 7
+'
+
+'Save all current iptables rules:'
+
+'Ubuntu:'
+
+'$/etc/init.d/iptables save
+
+# /sbin/service iptables save
+'
+
+'Red Hat/CentOS:'
+
+'$/etc/init.d/iptables save
+
+# /sbin/iptables-save
+'
+
+'List all current iptables rules:'
+
+'$iptables -L
+'
+
+'Flush all current iptables rules:'
+
+'$iptables -F
+'
+
+'Start/stop iptables service:'
+
+'$service iptables start
+
+# service iptables stop
+'
+
+'Start/stop ufw service:'
+
+'$ufw enable
+# ufw disable
+'
+
+'Start/stop ufw logging:'
+
+'$ufw logging on
+# ufw logging off
+'
+
+'Backup all current ufw rules:'
+
+'$cp /lib/ufw/{user.rules,user6.rules} /<BACKUP LOCATION>
+
+# cp /lib/ufw/{user.rules,user6.rules} ./
+'
+
+'Example uncomplicated firewall (ufw) commands (IP, IP range, port blocks):'
+
+'$ufw status verbose
+
+# ufw delete <RULE #>
+
+# ufw allow for <IP ADDRESS>
+
+# ufw allow all 80/tcp
+
+# ufw allow all ssh
+
+# ufw deny from <BAD IP ADDRESS> proto udp to any port 443
+'
+
+
+---------------------
+
+#### Passwords
+
+'Change Password:'
+
+'
+$ passwd (for current user)
+
+$ passwd bob (for user bob)
+
+$ sudo su passwd (for root user)
+'
+
+---------------
+
+#### Host Files
+
+'Add new malicious domain to hosts file, and route to localhost:'
+
+'$echo 127.0.0.1 <MALICIOUS DOMAIN> >> /etc/hosts
+'
+
+'Check if hosts file is working, by pinging and checking if it goes to 127.0.0.1:'
+
+'$ping -c 1 <MALICIOUS DOMAIN>
+'
+
+'Ubuntu/Debian DNS cache flush:'
+
+'$/etc/init.d/dns-clean start
+'
+
+'Flush nscd DNS cache four ways:'
+
+'$/etc/init.d/nscd restart
+
+# service nscd restart
+
+# service nscd reload
+
+# nscd -i hosts
+'
+
+'Flush dnsmasq DNS cache:'
+
+'$/etc/init.d/dnsmasq restart
+'
+
+
+
+-------------------
+
+#### Whitelist 
+
+'Use a Proxy Auto Config (PAC) file to create Bad URL or IP list (IE, Firefox, Chrome):'
+
+'
+function FindProxyForURL( url, host ){
+    
+    // Send bad DNS name to the proxy
+
+    if ( dnsDomainIs( host, ".badsite.com" ) )
+        return "PROXY http://127.0.0.1:8080";
+
+    // Send bad IPs to the proxy
+
+    if ( isInNet( myIpAddress(), "222.222.222.222", "255.255.255.0" ) )
+        return "PROXY http://127.0.0.1:8080";
+
+    // All other traffic bypass proxy
+
+    return "DIRECT"
+
+}
+'
+
+----------------------
+
+#### IPsec
+
+'Allow firewall to pass IPsec traffic:'
+
+'$iptables -A INPUT -p esp -j ACCEPT
+
+# iptables -A INPUT -p ah -j ACCEPT
+
+# iptables -A INPUT -p udp --dport 500 -j ACCEPT
+
+# iptables -A INPUT -p udp --dport 4500 -j ACCEPT
+'
+
+
+'Pass IPsec traffic:'
+
+'Step 1:' Install Racoon utiltity on <HOST1 IP ADDRESS> and <HOST2 IP ADDRESS> to enable IPsec tunnel in Ubuntu.
+
+'$apt-get install racoon
+'
+
+'Step 2:' Choose direct then edit `/etc/ipsec-tools.conf` on <HOST1 IP ADDRESS> AND <HOST2 IP ADDRESS>.
+
+'
+flush;
+
+spdflush;
+
+spdadd <HOST1 IP ADDRESS> <HOST2 IP ADDRESS> any -P out ipsec
+    esp/transport//require;
+
+spdadd <HOST2 IP ADDRESS> <HOST1 IP ADDRESS> any -P in ipsec
+    esp/transport//require;
+'
+
+'Step 3:' Edit `/etc/racoon/racoon.conf` on <HOST1 IP ADDRESS> and <HOST2 IP ADDRESS>.
+
+'
+log notify;
+
+path pre_shared_key "/etc/racoon/psk.txt";
+
+path certificate "/etc/racoon/certs";
+
+remote anonymous {
+        exchange_mode main,aggresive;
+        proposal {
+
+        encryption_algorithm aes_256;
+        hash_algorithm sha256l
+        authentication_method pre_shared_key;
+        dh_group modp1024;
+    }
+    
+    generate_policy off;
+}
+
+sainfo anonymous {
+    
+    pfs_group 2;
+    encryption_algorithm aes_256;
+    authentication_algorithm hmac_sha256;
+    compression_algorithm deflate;
+}
+'
+
+'Step 4:' Add preshard key to both hosts.
+
+'On HOST1:'
+
+'$echo <HOST2 IP ADDRESS> <PRESHARED PASSWORD> >> /etc/racoon/psk.txt
+'
+
+'On HOST2:'
+
+'$echo <HOST1 IP ADDRESS> <PRESHARED PASSWORD> >> /etc/racoon/psk.txt
+'
+
+'Step 5:' Restart service on both machines:
+
+'$service setkey restart
+'
+
+'Check security associations, configuration and policies:'
+
+'$setkey -D
+
+# setkey -DP
+'
+
+--------------------------
+
+## '2. Detect (Visibility)'
+
+### Network Monitoring
+
+#### TCPdump
+
+
+'View ASCII (-A) or (-X) traffic:'
+
+'$tcpdump -A
+
+# tcpdump -X
+'
+
+'View traffic with timestamps and don't convert addresses and be verbose:'
+
+
+'$tcpdump -tttt -n -vv
+'
+
+'Find top talkers after 1000 packets (Potential DDOS):'
+
+
+'$tcpdump -nn -c 1000 | awk '{print $3}' | cut -d. -f1-4 | sort -n | uniq -c | sort -nr
+'
+
+'Capture traffic on any interface from a target host and specific port and output to a file:'
+
+'
+tcpdump -w <FILENAME>.pcap -i any dst <TARGET IP ADDRESS> and port 80
+'
+
+'View traffic only between two hosts:'
+
+'$tcpdump host 10.0.0.1 && host 10.0.0.2
+'
+
+'View all traffic except from a net or a host:'
+
+'$tcpdump not net 10.10 && not host 192.168.1.2
+'
+
+'View host and either of two other hosts:'
+
+'$tcpdump host 10.10.10.10 && \(10.10.10.20 or 10.10.10.30\)
+'
+
+'Save pcap file on rotating size:'
+
+'$tcpdump -n -s65535  -C 10000 -w '%host_%Y-%m-%d_%H:%M:%S.pcap'
+'
+
+'Save pcap file to a remote host:'
+
+'$tcpdump -w - | ssh <REMOTE HOST ADDRESS> -p 50005 "cat - > /tmp/remotecapture.pcap"
+'
+
+'Grab traffic that contains the word pass:'
+
+'$tcpdump -n -A -s0 | grep "pass"
+'
+
+'Grab many clear text protocol passwords:'
+
+'$tcpdump -n -A -s0 port http or port ftp or port smtp or port imap or port pop3 | egrep -i 'pass=|pwd=|log=|login=|user=|username=|pw=|passw=|passwd=|password=|pass:|user:|username:|password:|login:|pass |user ' --color=auto --line-buffered -B20
+'
+
+'Get throughput:'
+
+'$tcpdump -w - | pv -bert >/dev/null
+'
+
+'Filter out ipv6 traffic:'
+
+'$tcpdump not ip6
+'
+
+'Filter out ipv4 traffic:'
+
+'$tcpdump ip6
+'
+
+
+'Script to capture multiple interface tcpdumps to files rotating every hour:'
+
+'
+#!/bin/bash
+
+tcpdump -pni any -s65535 -G 3600 -w any%Y-%m-%d_$H:%M:%S.pcap
+'
+
+'Script to move multiple tcpdump files to alternate location:'
+
+'
+#!/bin/bash
+
+while true; do
+sleep 1;
+rsync -azvr -progress <USERNAME>@<IP ADDRESS>:<TRAFFIC DIRECTORY>/. <DESTINATION DIRECTORY>/.
+done
+'
+
+'Look for suspicious and self-signed SSL certificates:'
+
+'$tcpdump -s 1500 -A '(tcp[((tcp[12:1]  & 0xf0) >> 2)+5:1] = 0x01) and (tcp[((tcp[12:1] & 0xf0) >> 2:1] = 0x16'
+'
+
+'Get SSL Certificate:'
+
+'$openssl s_client -connect <URL>:443
+
+# openssl s_client -connect <URL>:443 </dev/null 2>/dev/null | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > <CERT>.pem
+'
+
+'Examine and verify the certificate and check for self-signed:'
+
+'$openssl x509 -text -in <CERT>.pem
+
+# openssl x509 -in <CERT>.pem -noout -issuer -subject -startdate -enddate -fingerprint
+
+# openssl verify <CERT>.pem
+'
+
+'Extract Certificae Server Name:'
+
+'$tshark -nr <PCAP FILE NAME> -Y "ssl.handshake.ciphersuites" -Vx| grep "Server Name: " | sort | uniq -c | sort -r
+'
+
+
+'Extract Certificate info for analysis:'
+
+'$ssldump -Nr <FILE NAME>.pcap | awk 'BEGIN {c=0;} { if ($0 ~ /^[  ]+Certificate$/) {c=1; print "=================================";} if ($0 !~ /^ +/) {c=0;} if (c==1) print $0; }'
+'
+
+
+---------------------
+
+#### tshark
+
+'Get list of network interfaces:'
+
+'$tshark -D
+'
+
+'Listen on multiple network interfaces:'
+
+'$tshark -i eth1 -i eth2 -i eth3
+'
+
+'Save to pcap and disable name resolution:'
+
+'$tshark -nn -w <FILE NAME>.pcap
+'
+
+'Get absolute data and time stamp:'
+
+'$tshark -t a
+'
+
+'Get arp or icmp traffic:'
+
+'$tshark arp or icmp
+'
+
+'Capture traffic between to [hosts] and/or [nets]:'
+
+'$tshark "host <HOST 1> && host <HOST 2>"
+
+# tshark -n "net <NET 1> && net <NET 2>"
+'
+
+'Filter just host and IPs (or not your IP):'
+
+'$tshark -r <FILE NAME>.pcap -q -z hosts,ipv4
+
+# tshark not host <YOUR IP ADDRESS>
+'
+
+'Not ARP and UDP:'
+
+'$tshark not arp not (udp.port == 53)
+'
+
+'Replay a pcap file:'
+
+'$tshark -r <FILE NAME>.pcap
+'
+
+'Replay a pcap and just grab hosts and IPs:'
+
+'$tshark -r <FILE NAME>.pcap -q -z hosts
+'
+
+'Setup a capture session (duration = 60 sec):'
+
+'$tshark -n -a files:10 -a filesize:100 -a duration:60 -w <FILE NAME>.pcap
+'
+
+'Grab src/dst IPs only:'
+
+'$tshark -n -e ip.src -e ip.dst -T fields -E separator=, -R ip
+'
+
+'Grab IP of src DNS and DNS query:'
+
+'$tshark -n -e ip.src -e dns.qry.name -E separator=';' -T fields port 53
+'
+
+'Grab HTTP URL host and request:'
+
+'$tshark -R http.request -T fields -E separator=';' -e http.host -e http.request.uri
+'
+
+'Grab just HTTP host requests:'
+
+'$tshark -n -R http.request -T fields -e http.host
+'
+
+'Grab top talkers by IP dst:'
+
+'$tshark -n -c 150 | awk '{print $4}' | sort -n | uniq -c | sort -nr
+'
+
+'Grab top stats of protocols:'
+
+'$tshark -q -z io,phs -r <FILE NAME>.pcap
+
+# tshark -r <PCAP FILE>.pcap -R http.request -T fields -e http.host -e http.request.utri | sed -e 's/?.*$//' | sed -e 's#^(.*)t(.*)$#http://12#' | sort | uniq -c | sort -rn | head
+
+# tshark -n -c 100 -e ip.src -R "dns.flags.response eq 1" -T fields port 53
+
+# tshark -n -c 100 -e ip.src -R "dns.flags.response eq 1" -T fields port 53
+
+# tshark -n -e http.request.uri -R http.request -T fields | grep exe
+
+# tshark -n -c 1000 -e http.host -R http.request -T fields port 80 | sort | uniq -c | sort -r
+'
+
+
+--------------------
+
+#### Snort
+
+'Run test on snort config file:'
+
+'$snort -T -c /<PATH TO SNORT>/snort/snort.conf
+'
+
+'Use snort (v=verbose, d=dump packet payload):'
+
+'$snort -dv -r <LOG FILE NAME>.log
+'
+
+'Replay a log file and match icmp traffic:'
+
+'$snort -dvr packet.log icmp
+'
+
+'Logs in ASCII:'
+
+'$snort -K ascii -l <LOG DIRECTORY>
+'
+
+'Logs in binary:'
+
+'$snort -l <LOG DIRECTORY>
+'
+
+'Send events to console:'
+
+'$snort -q -A console -i eth0 -c /etc/snort/snort.conf
+
+# snort -c snort.conf -l /tmp/so/console -A console
+'
+
+'Create a single snort rule and save:'
+
+'$echo alert any any <SNORT RULE> > one.rule
+'
+
+'Test single rule:'
+
+'$snort -T -c one.rule
+'
+
+'Run single rule and output to console and logs dir:'
+
+'$mkdir ./logs
+
+# snort -vd -c one.rule -r <PCAP FILE NAME>.pcap -A console -l logs
+'
+
+----------------
+
+### Network Capture (PCAP) Tools
+
+#### Editcap
+
+'Use to edit a pcap file (split into 1000 packets):'
+
+'$editcap -F pcap -c 1000 original.pcap out_split.pcap
+'
+
+'Use to edit a pcap file (split into 1 hour each packets):'
+
+'$editcap -F pcap -t+3600 original.pcap out_split.pcap
+'
+
+#### Mergecap
+
+'Use to merge multiple pcap files:'
+
+'$mergecap -w merged_cap.pcap cap1.pcap cap2.pcap cap3.pcap
+'
+
+-------------
+
+
+### Honey Techniques
+
+#### Windows
+
+
+'Honey Ports Windows:'
+
+Reference: [http://securityweekly.com/wp-content/uploads/2013/06/howtogetabetterpentest.pdf](http://securityweekly.com/wp-content/uploads/2013/06/howtogetabetterpentest.pdf)
+
+'Step 1:' Create a new TCP firewall Block rule on anything connecting on port 3333:
+
+'
+C:\> echo @echo off for /L $$i in (1,1,1) do @for /f "tokens=3" %%j in ('netstat -nao ^|find ^":3333^"') do@for /f "tokens=1 delims=:" %%k in ("%%j") do netsh advfirewall firewall add rulename="HONEY TOKEN RULE" dir=in remoteip=%%k localport=any protocol=TCP action=block >> <BATCH FILENAME>.bat
+'
+
+'Step 2:' Run batch script:
+
+'
+C:\> <BATCH FILE NAME>.bat
+'
+
+
+'Windows Honey Ports Powershell Script:' Ref: [https://github.com/Pwdrkeg/honeyport/blob/master/honeyport.ps1](https://github.com/Pwdrkeg/honeyport/blob/master/honeyport.ps1)
+
+
+'Step 1:' Download PowerShell script
+
+'
+C:\> "%ProgramFiles%\Internet Explorer\iexplore.exe" https://github.com/Pwdrkeg/honeyport/blob/master/honeyport.ps1
+'
+
+'Step 2:' Run PowerShell script
+
+'
+C:\> honeyport.ps1
+'
+
+'Honey Hashes for Windows (Also for detecting mimikatz use):' Ref: [https://isc.sans.edu/forums/diary/Detecting+Mimikatz+Use+On+Your+Network/19311/](https://isc.sans.edu/forums/diary/Detecting+Mimikatz+Use+On+Your+Network/19311/)
+
+
+'Step 1:' Create Fake Honey Hash. Note 'ENTER A FAKE PASSWORD AND KEEP COMMAND PROMPS OPEN TO KEEP A PASSWORD IN MEMORY.'
+
+'
+C:\> runas /user:yourdomain.com\fakeadministratoraccount /netonly cmd.exe
+'
+
+'Step 2:' Query for Remote Access Attempts
+
+'
+C:\> wevtutil qe System /q:"*[System[(EventID=20274)]]" /f:text /rd:true /c:1 /r:remotecomputername
+'
+
+'Step 3:' Query for Failed Login Attempts
+
+'
+C:\> wevtutil qe System /q:"*[System[(EventID=4624 or EventID=4625)]]" /f:text /rd:true /c:5 /r:remotecomputername
+'
+
+'Step 4:' (Optional) Run queries in infinit loop with 30s pause
+
+'
+C:\> for /L %i in ( 1, 0, 2 ) do wevtutil qe System /q:"*[System[(EventID=20274)]]" /f:text /rd:true /c:1 /r:remotecomputername & wevtutil qe System /q:"*[System[(EventID=4624 or EventID=4625)]]" /f:text /rd:true /c:5 /r:remotecomputername & timeout 30
+'
+
+
+
+#### Linux
+
+
+'Honey Ports Linux:'
+
+Ref: [http://securityweekly.com/wp-content/uploads/2013/06/howtogetabetterpentest.pdf](http://securityweekly.com/wp-content/uploads/2013/06/howtogetabetterpentest.pdf)
+
+'Step 1:' Run a while loop to create TCP firewall rules to block any hosts connecting on port 2222
+
+'$while [ 1 ]; echo "started"; do IP=`nc -n -l -p 2222 2>&1 1>/dev/null | grep from | cut -d[  -f 3 | cut -d] -f 1`; iptables -A INPUT -p tcp -s ${IP} -j DROP; done
+'
+
+'Linux Honey Ports Python Script:' 
+
+Ref: [https://github.com/gchetrick/honeyports/blob/master/honeyports-0.5.py](https://github.com/gchetrick/honeyports/blob/master/honeyports-0.5.py)
+
+'Step 1:' Download Python Script
+
+'$wget https://github.com/gchetrick/honeyports/blob/master/honeyports-0.5.py
+'
+
+'Step 2:' Run Python Script
+
+'$python honeyports-0.5.py -p <CHOOSE AN OPEN PORT> -h <HOST IP ADDRESS>
+'
+
+'Detect rogue scanning with Labrea Tarpit:'
+
+'$apt-get install labrea
+
+# labrea -z -s -o -b -v -i eth0 2>&1 | tee -a log.txt
+'
+
+#### Netcat
+
+'Use netcat to listen for scanning threats'
+
+'$nc -v -k -l 80
+
+# nc -v -k -l 443
+
+# nc -v -k -l 3389
+'
+
+#### Passive DNS Monitoring
+
+'Use dnstop to monitor DNS requests at any sniffer location:'
+
+'$apt-get update
+
+# apt-get install dnstop
+
+# dnstop -l 3 <INTERFACE NAME>
+'
+
+'Step 1:' Hit 2 key to show query names
+
+'Use dnstop to monitor DNS requests from a pcap file:'
+
+'$dnstop -l 3 <PCAP FILE NAME> | <OUTPUT FILE NAME>.txt
+'
+
+
+---------------
+
+### Log Auditing
+
+#### Windows
+
+'Increase Log size to support increased auditing'
+
+'
+C:\> reg add HKLM\Software\Policies\Microsoft\Windows\EventLog\Application /v MaxSize /t REG_DWORD /d 0x19000
+
+
+C:\> reg add HKLM\Software\Policies\Microsoft\Windows\EventLog\Security /v MaxSize /t REG_DWORD /d 0x64000
+
+C:\> reg add HKLM\Software\Policies\Microsoft\Windows\EventLog\System /v MaxSize /t REG_DWORD /d 0x19000
+'
+
+'Check settings of security log:'
+
+'
+C:\> wevtutil gl Security
+'
+
+'Check settings of audit policies:'
+
+'
+C:\> auditpol /get /category:*
+'
+
+'Set Log Auditing on Success and/or Failure on All Categories:'
+
+'
+C:\> auditpol /set /category:* /success:enable /failure:enable
+'
+
+'Set Log Auditing on Success and/or Failure on Subcategories:'
+
+'
+C:\> auditpol /set /subcategory:"Detailed File Share" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"File System" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Security System Extension" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"System Integrity" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Security State Change" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Other System Events" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Logon" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Logoff" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Account Lockout" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Other Logon/Logoff Events" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Network Policy Server" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Registry" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"SAM" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Certification Services" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Application Generated" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Handle Manipulation" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"File Share" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Filtering Platform Packet Drop" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Filtering Platform Connection" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Other Object Access Events" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Sensitive Privilege Use" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Non Sensitive Privilege Use" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Other Privilege Use Events" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Process Termination" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"DPAPI Activity" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"RPC Events" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Process Creation" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Audit Policy Change" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Authentication Policy Change" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"MPSSVC Rule-Level Policy Change" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Filtering Platform Policy Change" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Other Policy Change Events" /success:enable /failure:enables
+
+C:\> auditpol /set /subcategory:"User Account Management" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Computer Account Management" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Security Group Management" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Distribution Group Management" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Application Group Management" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Other Account Management Events" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Directory Service Changes" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Directory Service Replication" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Detailed Directory Service Replication" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Directory Service Access" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Kerberos Service Ticket Operations" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Other Account Logon Events" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Kerberos Authentication Success" /success:enable /failure:enable
+
+C:\> auditpol /set /subcategory:"Credential Validation" /success:enable /failure:enable
+'
+
+'Check for list of available logs, size, retention limit:'
+
+'
+PS C:\> Get-EventLOg -List
+'
+
+'Partial List of Key Security Log Auditing Events monitor:'
+
+'
+PS C:\> Get-EventLog -newest 5 -logname application | Format-List
+'
+
+'Show log from remote system:'
+
+'
+PS C:\> Show-EventLog -ComputerName <SERVER NAME>
+'
+
+'Get a specific list of events based on Event ID:'
+
+'
+PS C:\> Get-EventLog Security | ? { $_.EventId -eq 4800 }  
+
+PS C:\> Get-WinEvent -FilterHashtable @{LogName="Security"; ID=4774}
+'
+
+'Account Logon - Audit Credential Validation Last 14 Days:'
+
+'
+PS C:\> Get-EventLog Security 4768,4771,4772,4769,4770,4649,4778,4779,4800,4801,4802,4803,5378,5632,5633 -After ((Get-Date).addDays(-14))
+'
+
+'Account - Logon/Logoff:'
+
+'
+PS C:\> Get-EventLog Security 4625,4634,4647,4624,4625,4648,4675,6272,6273,6724,6275,6276,6277,6278,6279,6280,4649,4778,4779,4800,4801,4802,4803,5378,5632,5633,4964 -after ((Get-Date).addDays(-1))
+'
+
+'Account Management - Audit Application Group Management:'
+
+'
+PS C:\> Get-EventLog Security 4783,4784,4785,4786,4787,4788,4789,4790,4741,4742,4743,4744,4745,4746,4747,4748,4749,4750,4751,4752,4753,4759,4760,4761,4782,4793,4727,4728,4729,4730,4731,4732,4733,4734,4735,4737,4754,4755,4756,4757,4758,4764,4720,4722,4723,4724,4725,4726,4738,4740,4765,4766,4767,4780,4781,4794,5376,5377 -After ((Get-Date.addDays(-1))
+'
+
+'Detailed Tracking - Audit DPAPI Activity, Process Termination, RPC Events:'
+
+'
+PS C:\> Get-EventLog Security 4692,4693,4694,4695,4689,5712 -After ((Get-Date).addDays(-1))
+'
+
+'Domain Service Access - Audit Directory Service Access:'
+
+'
+PS C:\> Get-EventLog Security 4662,5136,5137,5138,5139,5141 -After ((Get-Date).addDays(-1))
+'
+
+'Object Access - Audit File Share, File System, SAM, Registry, Certifications:'
+
+'
+PS C:\> Get-EventLog Security 4671,4691,4698,4699,4700,4701,4702,5148,5149,5888,5889,5890,4657,5039,4659,4660,4661,4663,4656,4658,4690,4874,4875,4880,4881,4882,4884,4885,4888,4890,4891,4892,4895,4896,5145,5140,5142,5143,5144,5168,4664,4985,5152,5153,5031,5140,5151,5154,5155,5156,5157,5158,5159 -After ((Get-Date).addDays(-1))
+'
+
+'Policy Change - Audit Policy Change, Microsoft Protection Service, Windows Filtering Platform:'
+
+'
+PS C:\> Get-EventLog Security 4715,4719,4817,4902,4904,4905,4906,4907,4908,4912,4713,4716,4717,4718,4739,4864,4865,4866,4867,4704,4705,4706,4707,4714,4944,4945,4946,4947,4948,4949,4950,4951,4952,4953,4954,4956,4957,4958,5046,5047,5048,5449,5450,4670 -After ((Get-Date).addDays(-1))
+'
+
+'Privilege Use - Audit Non-Sensitive/Sensitive Privilege Use:'
+
+'
+PS C:\> Get-EventLog Security 4672,4673,4674 -After ((Get-Date).addDays(-1))
+'
+
+'System - Audit Security State Change, Security System Extension, System Integrity, System Events:'
+
+'
+PS C:\> Get-EventLog Security 5024,5025,5027,5028,5029,5030,5033,5034,5035,5037,5058,5058,6400,6401,6402,6403,6404,6405,6406,6407,4608,4609,4616,4621,4610,4611,4622,4697,4612,4615,4618,4816,5038,5056,5057,5060,5061,5062,6281 -After ((Get-Date).addDays(-1))
+'
+
+'Add Microsoft IIS cmdlets:'
+
+'
+PS C:\> Add-PSSnapIn WebAdministration
+
+PS C:\> Import-Modyke WebAdministration
+'
+
+'Get IIS Website Information:'
+
+'
+PS C:\> Get-IISSite
+'
+
+'Get IIS Log Path Location:'
+
+'
+PS C:\> (Get-WebConfigurationProperty '/system.applicationHost/sites/siteDefaults' -Name 'logfile.directory').Value
+'
+
+
+'Set variable for IIS Log Path (default path):'
+
+'
+PS C:\> $LogDirPath = "C:\inetpub\logs\LogFiles\W3SVC1"
+'
+
+'Get IIS HTTP log file list from the last 7 days:'
+
+'
+PS C:\> Get-ChildItem -Path C:\inetput\logs\LogFiles\w3svc1 -Recurse | Where-Object { $_.LastWriteTime -lt (Get-Date).addDays(-7) }
+'
+
+'View IIS Logs (Using $LogDirPath variable set above):'
+
+'
+PS C:\> Get-Content $LogDirPath\*.log |%{$_ -Replace '#Fields: ',''} |?{$_ -notmatch '^#'} | ConvertFrom-Csv -Delimiter ' '
+'
+
+'View IIS logs:'
+
+'
+PS C:\> Get-Content <IIS LOG FILE NAME>.log |%{$_ -Replace '#Fields: ',''} |?{$_ -notmatch '^#'} | ConvertFrom-Csv -Delimiter ' '
+'
+
+'Find in IIS logs IP address `192.168.*.*` pattern:'
+
+'
+PS C:\> Select-String -Path $LogDirPath\*.log -Pattern '192.168.*.*'
+'
+
+'Find in IIS logs common SQL injection patterns:'
+
+
+'
+PS C:\> Select-String -Path $LogDirPath\*.log -Pattern '(@@version)|(sqlmap)|(Connect\(\))|(cast\()|(char\()|(bchar\()|(sys databases)|(\(select)|(convert\()|(Connect\()|(count\()|(sys objects)'
+'
+
+
+#### Linux
+
+'Authentication logs in Ubuntu:'
+
+'$tail /var/log/auth.log
+
+# grep -i "fail" /var/log/auth.log
+'
+
+'User login logs in Ubuntu:'
+
+'$tail /var/
+'
+
+'Look at Samba activity:'
+
+'$grep -i "samba" /var/log/syslog
+'
+
+'Look at cron activity:'
+
+'$grep -i "cron" /var/log/syslog
+'
+
+'Look at sudo activity:'
+
+'$grep -i "sudo" /var/log/syslog
+'
+
+'Look in Apache logs for 404 errors:'
+
+'$grep 404 <LOG FILE NAME> | grep -v -E "favicon.ico|robots.txt"
+'
+
+'Look in Apache logs for files requested:'
+
+'$head access_log | awk '{print $7}'
+'
+
+'Monitor for new created files every 5 minutes:'
+
+'$watch -n 300 -d ls -lR /<WEB DIRECTORY>
+'
+
+'Look where traffic is coming from:'
+
+'$cat <LOG FILE NAME> | fgrep -v <YOUR DOMAIN> | cut -d\" -f4 | grep -v ^-
+'
+
+'Monitor for TCP connections every 5 seconds:'
+
+'$netstat -ac 4 | grep tcp
+'
+
+'Install audit framework and review syscalls/events:'
+
+'$apt-get install auditd
+
+# auditctl -a exit,always -S execve
+
+# ausearch -m execve
+'
+
+'Get audit report summary:'
+
+'$aureport
+'
+
+
+--------------------
+
+## '4. Respond (Analysis)'
+
+### Live Triage - Windows
+
+#### System Information
+
+'
+C:\> echo %DATE% %TIME%
+
+C:\> hostname
+
+C:\> systeminfo
+
+C:\> systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
+
+C:\> wmic csproduct get name
+
+C:\> wmic bios get serialnumber
+
+C:\> wmic computersystem list brief
+'
+
+Reference: [https://technet.microsoft.com/en-us/sysinternals/psinfo.aspx](https://technet.microsoft.com/en-us/sysinternals/psinfo.aspx)
+
+'
+C:\> psinfo -accepteula -s -h -d
+'
+
+#### User Information
+
+'
+C:\> whoami
+
+C:\> net users
+
+C:\> net localgroup administrators
+
+C:\> net group administrators
+
+C:\> wmic rdtoggle list
+
+C:\> wmic useraccount list
+
+C:\> wmic group list
+
+C:\> wmic netlogin get name,lastlogon,badpasswordcount
+
+C:\> wmic netclient list brief
+
+C:\> doskey /history > history.txt
+'
+
+#### Network Information
+
+'
+C:\> netstat -e
+
+C:\> netstat -naob
+
+C:\> netstat -nr
+
+C:\> netstat -vb
+
+C:\> netstat -S
+
+C:\> route print
+
+C:\> arp -a
+
+C:\> ipconfig /displaydns
+
+C:\> netsh winhttp show proxy
+
+C:\> ipconfig /allcompartments /all
+
+C:\> netsh wlan show interfaces
+
+C:\> netsh wlan show all
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Internet Settings\Connections\WinHttpSettings"
+
+C:\> type %SYSTEMROOT%\system32\drivers\etc\hosts
+
+C:\> wmic nicconfig get descriptions,IPaddress,MACaddress
+
+C:\> wmic netuse get name,username,connectiontype,localname
+'
+
+
+#### Service Information
+
+'
+C:\> at
+
+C:\> tasklist
+
+C:\> tasklist /svc
+
+C:\> tasklist /svc /fi "imagename eq svchost.exe"
+
+C:\> schtasks
+
+C:\> net start
+
+C:\> sc query
+
+C:\> wmic service list brief | findstr "Running"
+
+C:\> wmic service list config
+
+C:\> wmic process list brief
+
+C:\> wmic process list status
+
+C:\> wmic process list memory
+
+C:\> wmic job list breif 
+
+PS C:\> Get-Service | Where-Object { $_.Status -eq "running" }
+'
+
+'List of all processes and then all loaded modules:'
+
+
+'
+PS C:\> Get-Process | Select modules|ForEach-Object{$_.modules}
+'
+
+
+#### Policy, Patch and Settings Information
+
+
+'
+C:\> set
+
+C:\> gpresult /r
+
+C:\> gpresult /z > <OUTPUT FILE NAME>.txt
+
+C:\> gpresult /H report.html /F
+
+C:\> wmic qfe
+'
+
+'List GPO software installed:'
+
+'
+C:\> reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Group Policy\AppMgmt"
+'
+
+#### Autorun and Autoload Information
+
+'Startup information:'
+
+'
+C:\> wmic startup list full
+
+C:\> wmic ntdomain list brief
+'
+
+'View directory contents of startup folder:'
+
+'
+C:\> dir "%SystemDrive%\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+
+C:\> dir "%SystemDrive%\Documents and Settings\All Users\Start Menu\Programs\Startup"
+
+C:\> dir "%userprofile%\Start Menu\Programs\Startup"
+
+C:\> dir "%ProgramFiles%\Startup"
+
+C:\> dir "C:\Users\%username%\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup"
+
+C:\> dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+
+C:\> dir "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
+
+C:\> dir "%ALLUSERSPROFILE%\Microsoft\Windows\Start Menu\Programs\Startup"
+
+C:\> dir "%ALLUSERSPROFILE%\Start Menu\Programs\Startup"
+
+C:\> type C:\Windows\winstart.bat
+
+C:\> type %windir%\wininit.ini
+
+C:\> type %windir%\win.ini
+'
+
+'View autoruns, hide Microsoft files:'
+
+
+Reference:  [https://technet.microsoft.com/en-us/sysinternals/bb963902.aspx](https://technet.microsoft.com/en-us/sysinternals/bb963902.aspx)
+
+'
+C:\> autorunsc -accepteula -m
+
+C:\> type C:\Autoexec.bat
+'
+
+'Show all autorun files, export to CSV and check with VirusTotal:'
+
+'
+C:\> autorunsc.exe -accepteula -a -c -i -e -f -l -m -v
+'
+
+'`HKEY_CLASSES_ROOT`':
+
+'
+C:\> reg query HKCR\Comfile\Shell\Open\Command
+
+C:\> reg query HKCR\Batfile\Shell\Open\Command
+
+C:\> reg query HKCR\htafile\Shell\Open\Command
+
+C:\> reg query HKCR\Exefile\Shell\Open\Command
+
+C:\> reg query HKCR\Exefiles\Shell\Open\Command
+
+C:\> reg query HKCR\piffile\shell\Open\Command
+'
+
+'`HKEY_CURRENT_USERS`:'
+
+'
+C:\> reg query "HKCU\Control Panel\Desktop"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Run"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnceEx"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\RunServices"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Windows\Run"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Windows\Load"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Windows\Scripts"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Windows" /f run
+
+C:\> reg query "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Windows" /f load
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\RecentDocs"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\ComDlg32\LastVisitedMRU"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\ComDlg32\OpenSaveMRU"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\ComDlg32\LastVisitedPidlMRU"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\ComDlg32\OpenSavePidlMRU" /s
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\RunMRU"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\Shell Folders"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\User Shell Folders"
+
+C:\> reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Applets\RegEdit" /v LastKey
+
+C:\> reg query "HKCU\Software\Microsoft\Internet Explorer\TypedURLs"
+
+C:\> reg query "HKCU\Software\Policies\Microsoft\Windows\Control Panel\Desktop"
+'
+
+'`HKEY_LOCAL_MACHINE`:'
+
+'
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\explorer\User Shell Folders"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\explorer\Shell Folders"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\ShellExecuteHooks" 
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s 
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer\Run"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnceEx"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunServices"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\RunServicesOnce"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Winlogon\Userinit"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\shellServiceObjectDelayLoad"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tasks" /s
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows"
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows" /f AppInit_DLLs
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows" /f Shell
+
+C:\> reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Windows" /f Userinit
+
+C:\> reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows\System\Scripts"
+
+C:\> reg query "HKLM\SOFTWARE\Classes\batfile\shell\open\command"
+
+C:\> reg query "HKLM\SOFTWARE\Classes\comfile\shell\open\command"
+
+C:\> reg query "HKLM\SOFTWARE\Classes\exefile\shell\open\command"
+
+C:\> reg query "HKLM\SOFTWARE\Classes\htafile\shell\open\Command"
+
+C:\> reg query "HKLM\SOFTWARE\Classes\piffile\shell\open\command"
+
+C:\> reg query "HKLM\SOFTWARE\Woww6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
+
+C:\> reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager"
+
+C:\> reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs"
+
+C:\> reg query "HKLM\SYSTEM\ControlSet001\Control\Session Manager\KnownDLLs"
+'
+
+#### Logs
+
+'Copy Event Logs:'
+
+'
+C:\> wevtutil epl Security C:\<BACK UP PATH>\mylogs.evtx
+
+C:\> wevtutil epl System C:\<BACK UP PATH>\mylogs.evtx
+
+C:\> wevtutil epl Application C:\<BACK UP PATH>\mylogs.evtx
+'
+
+'Get list of logs remotely:'
+
+Reference: [https://technet.microsoft.com/en-us/sysinternals/psloglist.aspx](https://technet.microsoft.com/en-us/sysinternals/psloglist.aspx)
+
+'
+C:\> psloglist \\<REMOTE COMPUTER> -accepteula -h 12 -x
+'
+
+'Clear all logs and start a baseline log to monitor:'
+
+'
+PS C:\> wevtutil el | Foreach-Object {wevtutil cl "$_"}
+'
+
+'List log filenames and path location:'
+
+'
+C:\> wmic nteventlog get path,filename,writeable
+'
+
+'Take pre-breach log export:'
+
+'
+PS C:\> wevtutil el | ForEach-Object { Get-EventLog -Log "$_" | Export-Csv -Path C:\<BASELINE LOG>.csv -Append}
+'
+
+'Take post-breach log export:'
+
+'
+PS C:\> wevtutil el | ForEach-Object { Get-EventLog -Log "$_" | Export-Csv -Path C:\<POST BASELINE LOG>.csv -Append}
+'
+
+'Compare two files baseline and post breach log:'
+
+'
+PS C:\> Compare-Object -ReferenceObject $(Get-Content "C:\<PATH TO FILE>\<ORIGINAL BASELINE LOGS>.txt") -DifferenceObject $(Get-Content "C:\<PATH TO FILE>\<POST BASELINE LOGS>.txt") >> <DIFFERENCES LOGS>.txt
+'
+
+'This deletes all logs:'
+
+'
+PS C:\> wevtutil el | ForEach-Object { wevtutil cl "$_" }
+'
+
+#### Files, Drives and Shares Information
+
+'
+C:\> net use \\<TARGET IP ADDRESS>
+
+C:\> net share
+
+C:\> net session
+
+C:\> wmic volume list brief
+
+C:\> wmic logicaldisk get description,filesystem,name,size
+
+C:\> wmic share get name,path
+'
+
+'Find multiple file types or a file:'
+
+'
+C:\> dir /A /S /T:A *.exe *.dll *.bat *.ps1 *.zip
+
+C:\> dir /A /S /T:A <BAD FILE NAME>.exe
+'
+
+'Find executable (.exe) files newer than Jan 1, 2017:'
+
+'
+C:\> forfiles /p C:\ /M *.exe /S /D +1/1/2017 /C "cmd /c echo @fdate @ftime @path"
+'
+
+'Find multiple file types using loops:'
+
+'
+C:\> for %G in (.exe, .dll, .bat, .ps) do forfiles -p "C:" -m *%G -s -d +1/1/2017 -c "cmd /c echo @fdate @ftime @path"
+'
+
+'Search for files newer than date:'
+
+'
+C:\> forfiles /P C:\  /S /D +1/01/2017 /C "cmd /c echo @path @fdate"
+'
+
+'Find large files: (example <20 MB)'
+
+'
+C:\> forfiles /S /M * /C "cmd /c if @fsize GEQ 2097152 echo @path @fsize"
+'
+
+'Find files with alternate data streams:'
+
+Reference: [https://technet.microsoft.com/en-us/sysinternals/streams.aspx](https://technet.microsoft.com/en-us/sysinternals/streams.aspx)
+
+'
+C:\> sigcheck -c -h -s  -u -nobanner <FILE OR DIRECTORY> > <OUTPUT FILENAME>.csv
+'
+
+'Find and show only unsigned files with a bad signature in C:'
+
+'
+C:\> sigcheck -e  -u -vr -s C:\
+'
+
+'List loaded unsigned DLLs:'
+
+Reference: [https://technet.microsoft.com/en-us/sysinternals/bb896656.aspx](https://technet.microsoft.com/en-us/sysinternals/bb896656.aspx)
+
+'
+C:\> listdlls.exe -u
+
+C:\> listdlls.exe -u <PROCESS NAME OR PID>
+'
+
+'Run Malware scan (Windows Defender) offline:'
+
+Reference: [https://windows.microsoft.com/en-us/windows/what-is-windows-defender-offline](https://windows.microsoft.com/en-us/windows/what-is-windows-defender-offline)
+
+'
+C:\> MpCmdRun.exe -SignatureUpdate
+
+C:\> MpCmdRun.exe -Scan
+'
+
+### Live Triage - Linux
+
+#### System Information
+
+
+'$uname -a
+
+# uptime
+
+# timedatectl
+
+# mount
+'
+
+#### User Information
+
+'View logged in users:'
+
+'$w
+'
+
+'Show if a user has ever logged in remotely:'
+
+'$lastlog
+
+# last
+'
+
+'View failed logins:'
+
+'$faillog -a
+'
+
+'View local user accounts:'
+
+'$cat /etc/passwd
+
+# cat /etc/shadow
+'
+
+'View local groups:'
+
+'$cat /etc/group
+'
+
+'View sudo access:'
+
+'$cat /etc/sudoers
+'
+
+'View accounts with UID 0:'
+
+'$awk -F: '($3 == "0") {print}' /etc/passwd
+
+# egrep ':0+' /etc/passwd
+'
+
+'View root authorized SSH key authentications:'
+
+'$cat /root/.ssh/authorized_keys
+'
+
+'List of files opened by user:'
+
+'$lsof -u <USER NAME>
+'
+
+'View the root user bash history:'
+
+'$cat /root/.bash_history
+'
+
+
+#### Network Information
+
+'View network interfaces:'
+
+'$ifconfig
+'
+
+'View network connections:'
+
+'$netstat -antup
+
+# netstat -plantux
+'
+
+'View listening ports:'
+
+'$netstat -nap
+'
+
+'View routes:'
+
+'$route
+'
+
+'View arp table:'
+
+'$arp -a
+'
+
+'List of processes listening to ports:'
+
+'$lsof -i
+'
+
+#### Service Information
+
+
+'View processes:'
+
+'$ps -aux
+'
+
+'List of loaded modules:'
+
+'$lsmod
+'
+
+'List of open files:'
+
+'$lsof
+'
+
+'List of open files, using the network'
+
+'$lsof -nPi | cut -f 1 -d " " | uniq | tail -n +2
+'
+
+'List of open files on specific process:'
+
+'$lsof -c <SERVICE NAME>
+'
+
+'Get all open files of a specific process ID:'
+
+'$lsof -p <PID>
+'
+
+'List of unlinked processes running:'
+
+'$lsof +L1
+'
+
+'Get path of suspicious process PID:'
+
+'$ls -al /proc/<PID>/exe
+'
+
+'Save fle for further malware binary analysis:'
+
+'$cp /proc/<PID>/exe > /<SUSPICIOUS FILE NAME TO SAVE>.elf
+'
+
+'Monitor logs in real-time:'
+
+'$less +F /var/log/messages
+'
+
+'List services:'
+
+'$chkconfig --list
+'
+
+#### Policy, Patch and Settings Information
+
+'View pam.d files:'
+
+'$cat /etc/pam.d/common*
+'
+
+#### Autorun and Autoload Information:
+
+'List cron jobs:'
+
+'$crontab -l
+'
+
+'List cron jobs by root and other UID 0 accounts:'
+
+'$crontab -u root -l
+'
+
+'Review for unusual cron jobs:'
+
+'$cat /etc/crontab
+
+# ls /etc/cron.*
+'
+
+#### Logs
+
+'View root user command history:'
+
+'$cat /root/.*history
+'
+
+'View last logins:'
+
+'$last
+'
+
+
+
+#### Files, Drives and Shares Information
+
+'View disk space:'
+
+'$df -ah
+'
+
+
+'View directory listing for /etc/init.d/:'
+
+'$ls -la /etc/init.d
+'
+
+'Get more info for a file:'
+
+'$stat -x <FILENAME>
+'
+
+'Identify file type:'
+
+'$file <FILENAME>
+'
+
+'Look for immutable files:'
+
+'$lsattr -R / | grep "\-i-"
+'
+
+'View directory listing for /root:'
+
+'$ls -la /root
+'
+
+'Look for files recently modified in a current directory:'
+
+'$ls -alt | head
+'
+
+'Look for world writeable files:'
+
+'$find / -xdev -type d \( -perm -0002 -a ! -perm -1000 \) -print
+'
+
+'Look for recently created files, in this case newer than Jan 02, 2017:'
+
+'$find / -newermt 2017-01-02q
+'
+
+'List all files and attributes:'
+
+'$find / -printf "%m;%Ax;%AT;Tx;%TT;%Cx;%CT;%U;%G;%s;%p\n"
+'
+
+'Look at files in directory by most recent timestamp (could be tampered):'
+
+'$ls -alt | head
+'
+
+'Check for rootkits or signs of compromise:'
+
+'Run unix-privesc-check tool:'
+
+'$wget https://raw.githubusercontent.com/pentestmonkey/unix-privesc-check/1_x/unix-privesc-check
+
+# ./unix-privesc-check > output.txt
+'
+
+'Run chkrootkit:'
+
+'$apt-get install chkrootkit
+
+# chkrootkit
+'
+
+
+'Run rkhunter:'
+
+'$apt-get install rkhunter
+
+# rkhunter --update
+
+# rkhunter --check
+'
+
+'Run tiger:'
+
+'$apt-get install tiger
+
+# tiger
+
+# less /var/log/tiger/security.report.*
+'
+
+'Run lynis:'
+
+'$apt-get install lynis
+
+# lynis audit system
+
+# less /var/logs/lynis.log
+'
+
+'Run Linux Malware Detect (LMD):'
+
+'$wget http://www.rfxn.com/downloads/maldetect-current.tar.gz
+
+# tar xfz maldetect-current.tar.gz
+
+# cd maldetect-*
+
+# ./install.sh
+'
+
+'Get LMD updates:'
+
+'$maldet -u
+'
+
+'Run LMD scan on directory:'
+
+'$maldet -a /<DIRECTORY>
+'
